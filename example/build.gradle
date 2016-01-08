@@ -1,0 +1,106 @@
+apply plugin: 'com.android.application'
+apply from: 'keystore.gradle'
+def versionMajor = 1
+def versionMinor = 0
+def versionPatch = 0
+def versionBeta = 1
+def buildTime = new Date().format("yyyy-MM-dd_HH_mm_ss", TimeZone.getTimeZone("GMT+8:00"))
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    defaultConfig {
+        applicationId "com.example.myapplication"
+        minSdkVersion 16
+        targetSdkVersion 23
+        versionCode versionMajor * 100 + versionMinor * 10 + versionPatch
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}"
+        //manifestPlaceholders = [UMENG_CHANNEL_VALUE: "Bingyan"]
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField "Boolean", "DEBUG_MODE", "true"
+            //applicationIdSuffix ".debug"
+            versionNameSuffix "-Beta${versionBeta}"
+            //signingConfig signingConfigs.release
+        }
+        release {
+            buildConfigField "Boolean", "DEBUG_MODE", "false"
+            minifyEnabled false
+            shrinkResources true
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    productFlavors {
+        //YingYongBao {}
+        //WanDouJia {}
+        //CoolApk {}
+        //XiaoMi {}
+        //Qihu360{}
+        //MeiZu {}
+        //Bingyan{}
+    }
+
+    productFlavors.all { flavor ->
+        flavor.manifestPlaceholders = [UMENG_CHANNEL_VALUE: name]
+    }
+
+    //修改生成的最终文件名
+    /*applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            File outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                File outputDirectory = new File(outputFile.parent);
+                String fileName
+                if (variant.buildType.name == "release") {
+                    // 输出apk名称为appName_v1.0.0_2015-12-15_12_00_06_playStore.apk
+                    fileName = "Feila_v${defaultConfig.versionName}_${buildTime}_${variant.productFlavors[0].name}.apk"
+                } else {
+                    fileName = "Feila_v${defaultConfig.versionName}_${buildTime}.apk"
+                }
+                output.outputFile = new File(outputDirectory, fileName)
+            }
+        }
+    }*/
+
+    // 去掉那些会产生冲突的说明和协议文档
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/MANIFEST.MF'
+    }
+
+    lintOptions {
+        abortOnError false
+        ignoreWarnings true
+        disable 'MissingTranslation'
+    }
+
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
+}
+
+/*Support Pack*/
+List supportPacks = new ArrayList()
+def spPrefix = 'com.android.support:'
+def spVersion = ':23.1.1'
+String[] spNames = ['appcompat-v7',
+                    'support-v4',
+                    'recyclerview-v7']
+for (i in spNames) {
+    supportPacks << spPrefix + i + spVersion
+}
+
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(':bingyan-common')
+    compile supportPacks
+
+}
+
